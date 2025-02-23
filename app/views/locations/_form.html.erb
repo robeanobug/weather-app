@@ -1,0 +1,10 @@
+<%= form_with model: location do |form| %>
+    <div>
+        <%= form.label :zip_code %>
+        <%= form.text_field :zip_code %>
+    </div>
+
+    <div>
+        <%= form.submit %>
+    </div>
+<% end %>

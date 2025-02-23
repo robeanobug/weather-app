@@ -1,0 +1,11 @@
+<h1>Weather Locations</h1>
+
+<%= link_to "New Location", new_location_path %>
+
+<div id="locations">
+    <% @locations.each do |location| %>
+        <div>
+            <%= link_to location.zip_code, location %>
+        </div>
+    <% end %>
+</div>

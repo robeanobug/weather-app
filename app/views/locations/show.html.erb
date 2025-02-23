@@ -1,0 +1,16 @@
+<h1><%= @location.zip_code %></h1>
+
+<h2>7-Day Forecast</h2>
+
+<ul>
+<% 7.times do |i| %>
+    <li>
+    <strong>Day <%= i + 1 %>:</strong>
+    Max Temp: <%= @location.max_temperatures[i] %>°F, Min Temp: <%= @location.min_temperatures[i] %>°F
+    </li>
+<% end %>
+</ul>
+
+<%= link_to "Back", locations_path %>
+<%= link_to "Edit", edit_location_path(@location) %>
+<%= button_to "Delete", @location, method: :delete, data: { turbo_confirm: "Are you sure?" } %>
