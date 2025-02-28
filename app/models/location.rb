@@ -1,6 +1,9 @@
 class Location < ApplicationRecord
   validates :zip_code, presence: true
 
+  VALID_ZIP_REGEX = /\A\d{5}\z/
+  validates :zip_code, format: { with: VALID_ZIP_REGEX, message: "must be exactly 5 digits" }
+
   before_save :convert_temperatures_to_json
   after_find :convert_temperatures_to_json
   

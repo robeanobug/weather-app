@@ -16,12 +16,19 @@ class LocationsController < ApplicationController
 
   def create
     @location = Location.new(location_params)
-    get_coordinates
-    get_weather
-    
-    if @location.save
-      redirect_to @location
+    if @location.valid?
+      if get_coordinates && get_weather
+        @location.save
+        flash[:notice] = "Location created successfully!"
+        redirect_to @location
+      else
+        # Flash alert when fetching coordinates or weather fails
+        flash[:alert] = "Failed to fetch coordinates or weather."
+        render :new, status: :unprocessable_entity
+      end
     else
+      # If update failed, show validation errors
+      flash[:alert] = @location.errors.full_messages.to_sentence
       render :new, status: :unprocessable_entity
     end
   end
@@ -30,20 +37,32 @@ class LocationsController < ApplicationController
   end
 
   def update
-    zip_changed = params[:location][:zip_code] != @location.zip_code
+    input = params[:location][:zip_code]
+    zip_changed = input != @location.zip_code
     
-    # if new zip code update the location's coordinates
     if @location.update(location_params)
       if zip_changed
-        get_coordinates
-        get_weather
+        if get_coordinates && get_weather
+          @location.save
+          flash[:notice] = "Location updated successfully!"
+          redirect_to @location
+        else
+          # Flash error when fetching coordinatesor weather fails
+          flash[:alert] = "Failed to update coordinates or weather."
+          render :edit, status: :unprocessable_entity
+        end
+      else
+        # No change in zip code, just update the location
+        flash[:notice] = "Location updated successfully!"
+        redirect_to @location
       end
-      @location.save
-      redirect_to @location, notice: "Location updated successfully!"
     else
+      # If update failed, show validation errors
+      flash[:alert] = @location.errors.full_messages.to_sentence
       render :edit, status: :unprocessable_entity
     end
   end
+
 
   def destroy
     @location.destroy
@@ -66,9 +85,10 @@ class LocationsController < ApplicationController
     if coordinates
       @location.latitude = coordinates[:latitude]
       @location.longitude = coordinates[:longitude]
+      return true
     else
       flash[:error] = coordinates[:error]
-      render :edit, status: :unprocessable_entity and return
+      return false
     end
   end
 
@@ -77,9 +97,10 @@ class LocationsController < ApplicationController
     if weather_data
       @location.max_temperatures = weather_data[:max_temps]
       @location.min_temperatures = weather_data[:min_temps]
+      return true
     else
       flash[:error] = "Unable to fetch weather data"
-      render :edit, status: :unprocessable_entity and return
+      return false
     end
   end
 end
